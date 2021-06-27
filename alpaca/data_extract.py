@@ -1,19 +1,54 @@
-import config, requests
+import config, requests, time, json
 from datetime import datetime, timezone
-import time
+from get_tickers import GetTickerClient
 
-start_time = datetime.strptime("2021-06-01","%Y-%m-%d")
-start_time = start_time.isoformat()
+#
+# start_time = datetime.strptime("2021-06-01","%Y-%m-%d")
+# start_time = start_time.isoformat()
+#
+# end_time = datetime.strptime("2021-06-02","%Y-%m-%d")
+# end_time = end_time.isoformat()
+#
 
-end_time = datetime.strptime("2021-06-02","%Y-%m-%d")
-end_time = end_time.isoformat()
+class DataExtractClient():
+    def __init__(self):
+        pass
+
+    def getBars(self, tickers, start_time, end_time, time_frame):
+        self.tickers = tickers
+        self.start_time = start_time
+        self.end_time = end_time
+        self.time_frame = time_frame
+
+        self.extract = {}
+
+        for ticker in self.tickers:
+            print("Pulling data for: %s" % ticker)
+            bars_url = "{}/v2/stocks/{}/bars?start={}Z&end={}Z&timeframe={}".format(config.HISTORICAL_DATA_ENDPOINT, ticker, self.start_time, self.end_time, self.time_frame)
+            r = requests.get(bars_url, headers = config.HEADERS)
+
+            if r.status_code == 200:
+                json_string = r.content.decode('utf-8')
+                #print(json_string)
+                self.extract[ticker] = json.loads(json_string)
+                print("Data pulled successfully for: %s" % ticker)
+                continue
+            print("Data pulled unsuccessfully for: %s" % ticker)
+
+        return self.extract
 
 
+if __name__ == '__main__':
+    start_time = datetime.strptime("2021-01-01","%Y-%m-%d")
+    start_time = start_time.isoformat()
 
+    end_time = datetime.strptime("2021-06-23","%Y-%m-%d")
+    end_time = end_time.isoformat()
 
-BARS_URL = "{}/v2/stocks/MSFT/bars?start={}Z&end={}Z&timeframe=1Day".format(config.HISTORICAL_DATA_ENDPOINT,start_time, end_time)
+    tickers = GetTickerClient().pullList('nsdq')
 
-print(BARS_URL)
-r = requests.get(BARS_URL, headers = config.HEADERS)
-
-print(r.content)
+    DEClient = DataExtractClient()
+    data = DEClient.getBars(tickers, start_time, end_time, '1Day')
+    with open("nsdq_2021.json", 'w') as filehandler:
+        json.dump(data, filehandler, indent=4)
+        #filehandler.writelines("%s" % data)
