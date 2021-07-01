@@ -1,5 +1,10 @@
+import sys
+sys.path.insert(0,'/workplace/gellstorm/sqlite')
+sys.path.insert(0,'/workplace/gellstorm/alpaca')
+
 import pandas as pd
 import json
+import sqliteUtility
 
 class DataLoadClient():
     def __init__(self):
@@ -17,7 +22,10 @@ class DataLoadClient():
         output_df = pd.DataFrame.from_dict(pd.json_normalize(output), orient='columns')
         return output_df
 
-    def loadData(self, _df, table_name, conn):
-
-        _df.to_sql(name = table_name, schema = 'abars', con = conn, if_exists='append', index = False)
+    def loadInsertData(self, df, table_name,  conn):
+        self.sqliteUtility = sqliteUtility.sqliteUtility()
+        self.columns = self.sqliteUtility.get_columns(conn, table_name)
+        self.df = df
+        self.df.columns = self.columns
+        self.df.to_sql(name = table_name, schema = 'GellstormDB', con = conn, if_exists='append', index = False)
         conn.commit()
