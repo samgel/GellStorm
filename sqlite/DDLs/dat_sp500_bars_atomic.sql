@@ -1,6 +1,6 @@
-create table sp500_bars_atomic(
+create table dat_bars_atomic(
 ticker text NOT NULL,
-t TEXT NOT NULL,
+t  datetime NOT NULL,
 o REAL NOT NULL,
 h REAL NOT NULL,
 l REAL NOT NULL,

@@ -14,26 +14,26 @@ class DataExtractClient():
     def __init__(self):
         pass
 
-    def getBars(self, tickers, start_time, end_time, time_frame):
-        self.tickers = tickers
+    def getBars(self, ticker, start_time, end_time, time_frame):
+        self.ticker = ticker
         self.start_time = start_time
         self.end_time = end_time
         self.time_frame = time_frame
-
+        self.ticker = ticker
         self.extract = {}
 
-        for ticker in self.tickers:
-            print("Pulling data for: %s" % ticker)
-            bars_url = "{}/v2/stocks/{}/bars?start={}Z&end={}Z&timeframe={}".format(config.HISTORICAL_DATA_ENDPOINT, ticker, self.start_time, self.end_time, self.time_frame)
-            r = requests.get(bars_url, headers = config.HEADERS)
 
-            if r.status_code == 200:
-                json_string = r.content.decode('utf-8')
-                #print(json_string)
-                self.extract[ticker] = json.loads(json_string)
-                print("Data pulled successfully for: %s" % ticker)
-                continue
-            print("Data pulled unsuccessfully for: %s" % ticker)
+        #print("Pulling data for: %s" % self.ticker)
+        bars_url = "{}/v2/stocks/{}/bars?start={}Z&end={}Z&timeframe={}&limit=10000".format(config.HISTORICAL_DATA_ENDPOINT, self.ticker, self.start_time, self.end_time, self.time_frame)
+        r = requests.get(bars_url, headers = config.HEADERS)
+
+        if r.status_code == 200:
+            json_string = r.content.decode('utf-8')
+            #print(json_string)
+            self.extract[ticker] = json.loads(json_string)
+            #print("Data pulled successfully for: %s" % ticker)
+
+        #print("Data pulled unsuccessfully for: %s" % ticker)
 
         return self.extract
 
